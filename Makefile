@@ -5,8 +5,9 @@ TEMPLATE = page.tmpl
 STYLE = css/style.css
 
 HTML = tutorial.html
+HTML.CN = tutorial.cn.html
 
-all: $(HTML)
+all: $(HTML) $(HTML.CN)
 
 includes: includes.hs
 	ghc --make $<
@@ -21,4 +22,4 @@ includes: includes.hs
 	./includes < $< | $(PANDOC) -c -s -f $(IFORMAT) --latex-engine=xelatex $(FLAGS) -o $@
 
 clean:
-	-rm $(CHAPTERS) $(HTML)
+	-rm $(CHAPTERS) $(HTML) $(HTML.CN)
