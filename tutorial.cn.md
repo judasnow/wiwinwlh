@@ -76,20 +76,19 @@ Sections that have had been added or seen large changes:
 Cabal
 -----
 
-Cabal is the build system for Haskell, it also doubles as a package manager.
+Cabal 是Haskell的编译（build）平台，同时也身兼包管理的功能。
 
-For example to install the [parsec](http://hackage.haskell.org/package/parsec)
-package from Hackage to our system invoke the install command:
+比如要从hackages安装库文件[parsec](http://hackage.haskell.org/package/parsec)到本地，可以通过以下命令完成
 
 ```bash
-$ cabal install parsec           # latest version
-$ cabal install parsec==3.1.5    # exact version
+$ cabal install parsec           # 最新版本
+$ cabal install parsec==3.1.5    # 特定版本
 ```
 
-The usual build invocation for Haskell packages is the following:
+通常编译一个Haskell的包是这样进行的
 
 ```bash
-$ cabal get parsec    # fetch source
+$ cabal get parsec    # 下载源代码
 $ cd parsec-3.1.5
 
 $ cabal configure
@@ -97,61 +96,48 @@ $ cabal build
 $ cabal install
 ```
 
-To update the package index from Hackage run:
+如果要更新本地对Hackage的索引，则需
 
 ```bash
 $ cabal update
 ```
 
-To start a new Haskell project run
+那么要新建一个Haskell项目， 则是这样的
 
 ```bash
 $ cabal init
 $ cabal configure
 ```
 
-A ``.cabal`` file will be created with the configuration options for our new
-project.
+新建的项目会自动生成一个``.cabal``文件。
 
-The latest feature of Cabal is the addition of Sandboxes ( in cabal
-> 1.18 ) which are self contained environments of Haskell packages
-separate from the global package index stored in the ``./.cabal-sandbox`` of our
-project's root. To create a new sandbox for our cabal project run.
+最近Cabal加入了一个名为沙盒(Sandboxes)的新功能（cabal > 1.18），用这个沙盒模式可以创建独立的Haskell包环境，不会和全局的包环境混淆，因为它的索引是存在项目根目录的```.cabal-sandbox```。通过以下命令新建一个项目的沙盒
 
 ```bash
 $ cabal sandbox init
 ```
 
-In addition the sandbox can be torn down.
+另外，沙盒是可以被删除的
 
 ```bash
 $ cabal sandbox delete
 ```
 
-Invoking the cabal commands when in the working directory of a project with a
-sandbox configuration set up alters the behavior of cabal itself. For example
-the ``cabal install`` command will only alter the install to the local package
-index and will not touch the global configuration. 
+在一个配置了沙盒的项目里运行Cabal命令只会影响当前项目本身。比如，```cabal install```只会安装包文件到当前项目，并不影响全局的包环境。 
 
-To install the dependencies from the cabal file into the newly created sandbox
-run:
+以下命令会只安装项目所依赖的包文件到新建的沙盒。
 
 ```bash
 $ cabal install --only-dependencies
 ```
 
-Dependencies can also be built in parallel by passing ``-j<n>`` where ``n`` is
-the number of concurrent builds.
+可以通过``-j<n>``来并发安装依赖的包文件，``n``表示并发数量。
 
 ```bash
 $ cabal install -j4 --only-dependencies
 ```
 
-Let's look at an example cabal file, there are two main entry points that any
-package may provide: a ``library`` and an ``executable``. Multiple executables
-can be defined, but only one library. In addition there is a special form of
-executable entry point ``Test-Suite`` which defines an interface for unit tests
-to be invoked from cabal.
+接下来让我们来看一个cabal文件的例子。cabal文件有两个主要配置项，``library``和``executable``，一个cabal文件可以配置多个``executable``（即生成多个可执行的文件），但只能配置一个``library``（即独一无二的库文件名）。另外有一个特殊的``executable``配置项，``Test-Suite``，它是用来定义让cabal如何运行单元测试。
 
 For a library the ``exposed-modules`` field in the cabal file indicates which
 modules within the package structure will be publicly visible when the package
