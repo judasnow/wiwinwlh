@@ -123,7 +123,7 @@ $ cabal sandbox init
 $ cabal sandbox delete
 ```
 
-在一个配置了沙盒的项目里运行Cabal命令只会影响当前项目本身。比如，```cabal install```只会安装包文件到当前项目，并不影响全局的包环境。 
+在一个配置了沙盒的项目里运行Cabal命令只会影响当前项目本身。比如，```cabal install```只会安装包文件到当前项目，并不影响全局的包环境。
 
 以下命令会只安装项目所依赖的包文件到新建的沙盒。
 
@@ -139,33 +139,28 @@ $ cabal install -j4 --only-dependencies
 
 接下来让我们来看一个cabal文件的例子。cabal文件有两个主要配置项，``library``和``executable``，一个cabal文件可以配置多个``executable``（即生成多个可执行的文件），但只能配置一个``library``（即独一无二的库文件名）。另外有一个特殊的``executable``配置项，``Test-Suite``，它是用来定义让cabal如何运行单元测试。
 
-For a library the ``exposed-modules`` field in the cabal file indicates which
-modules within the package structure will be publicly visible when the package
-is installed, these are the user-facing APIs that we wish to expose to
-downstream consumers.
+作为文件库，可以用cabal文件的 ``exposed-modules`` 配置字段来定义要公开的接口，即当这个包被其它项目安装使用时，这些公共接口就是下游用户看到的接口。
 
-For an executable the ``main-is`` field indicates the Main module for the
-project that exports the ``main`` function to run for the executable logic of
-the application.
+然而如果编译成可执行文件，则 ``main-is`` 配置字段用来指明定义 ``main`` 函数的主模块， ``main`` 函数就是通常执行程序逻辑的主入口。
 
 ```bash
 name:               mylibrary
 version:            0.1
 cabal-version:      >= 1.10
-author:             Paul Atreides 
+author:             Paul Atreides
 license:            MIT
 license-file:       LICENSE
 synopsis:           The code must flow.
 category:           Math
 tested-with:        GHC
 build-type:         Simple
-  
-library                    
+
+library
     exposed-modules:
       Library.ExampleModule1
       Library.ExampleModule2
 
-    build-depends: 
+    build-depends:
       base >= 4 && < 5
 
     default-language: Haskell2010
@@ -173,11 +168,11 @@ library
     ghc-options: -O2 -Wall -fwarn-tabs
 
 executable "example"
-    build-depends: 
+    build-depends:
         base >= 4 && < 5,
         mylibrary == 0.1
     default-language: Haskell2010
-    main-is: Main.hs    
+    main-is: Main.hs
 
 Test-Suite test
   type: exitcode-stdio-1.0
@@ -188,34 +183,29 @@ Test-Suite test
       mylibrary == 0.1
 ```
 
-To run the "executable" for a library under the cabal sandbox:
+通过以下命令在沙盒里运行“可执行”结果。
 
 ```bash
 $ cabal run
 $ cabal run <name>
 ```
 
-To load the "library" into a GHCi shell under the cabal sandbox:
+通过以下命令在沙盒里把库文件载入到GHCi:
 
 ```bash
 $ cabal repl
 $ cabal repl <name>
 ```
 
-The ``<name>`` metavariable is either one of the executable or library
-declarations in the cabal file, and can optionally be disambiguated by the
-prefix ``exe:<name>`` or ``lib:<name>`` respectively.
+这里 ``<name>`` 用来指定可执行文件名或者库文件名。可以在名字前加前缀，更加明确的指明是可执行文件名 ``exe:<name>`` 还是库文件 ``lib:<name>`` 。
 
-To build the package locally into the ``./dist/build`` folder execute the
-``build`` command.
+要编译本地包到目录 ``,/dist/build`` ， 可以执行命令 ``build``
 
 ```bash
-$ cabal build 
+$ cabal build
 ```
 
-To run the tests, our package must itself be reconfigured with the
-``--enable-tests`` and the ``build-depends`` from the Test-Suite must be
-manually installed if not already.
+要运行测试，必须用选项 ``--enable-tests`` 重新安装项目， 还需要安装 ``Test-Suite`` 配置下的依赖 ``build-depends`` ， 如果之前这些依赖还没有安装好的话。
 
 ```bash
 $ cabal install --only-dependencies --enable-tests
@@ -224,48 +214,39 @@ $ cabal test
 $ cabal test <name>
 ```
 
-In addition arbitrary shell commands can also be invoked with the GHC
-environmental variables set up for the sandbox. Quite common is to invoke a new
-shell with this command such that the ``ghc`` and ``ghci`` commands use the
-sandbox ( they don't by default, which is a common source of frustration ).
+另外， 沙盒环境下可以运行任何带GHC环境变量的shell脚本。通常的做法是新建一个shell环境，这样 ``ghc`` 和 ``ghci`` 命令就可以很方便的运行在沙盒里了。
 
 ```bash
-$ cabal exec 
+$ cabal exec
 $ cabal exec sh # launch a shell with GHC sandbox path set.
 ```
 
-The haddock documentation can be built for the local project by executing the
-``haddock`` command, it will be built to the ``./dist`` folder.
+通过运行 ``haddoc`` 可以建立本地的haddock文档，可以在 ``./dist`` 目录中找到这些文档。
 
 ```bash
 $ cabal haddock
 ```
 
-When we're finally ready to upload to Hackage ( presuming we have a Hackage
-account set up ), then we can build the tarball and upload with the following
-commands:
+如果我们已经准备好可以上传包到Hackage （假设你已有Hackage的账号），那么打包一个tarball然后就开始上传了。
 
 ```bash
 $ cabal sdist
 $ cabal upload dist/mylibrary-0.1.tar.gz
 ```
 
-Sometimes you'd also like to add a library from a local project into a sandbox.
-In this case the add-source command can be used to bring it into the sandbox
-from a local directory.
+有时候我们会需要增加一个本地库到沙盒，此时可以通过 ``add-source`` 命令实现。
 
 ```bash
 $ cabal sandbox add-source /path/to/project
-```
 
-The current state of a sandbox can be frozen with all current package
-constraints enumerated. 
+```
+对于当前沙盒的状态， 我们可以冻结（frozen）依赖包的版本。
 
 ```bash
 $ cabal freeze
 ```
 
-This will create a file ``cabal.config`` with the constraint set.
+会新建一个 ``cabal.config`` 用来保留所有的依赖限制。
 
 ```haskell
 constraints: mtl ==2.2.1,
@@ -273,11 +254,7 @@ constraints: mtl ==2.2.1,
              transformers ==0.4.1.0
 ```
 
-Using the ``cabal repl`` and ``cabal run`` commands is preferable but sometimes
-we'd like to manually perform their equivalents at the shell, there are several
-useful aliases that rely on shell directory expansion to find the package
-database in the current working directory and launch GHC with the appropriate
-flags:
+一般我们偏向使用 ``cabal repl`` 和 ``cabal run``，但有时也会在shell环境来执行相似的操作。下面定义了几个有用的快捷方式（alias）用于shell环境来查找包索引数据库，以及用合适的标志（flags）运行GHC:
 
 ```bash
 alias ghc-sandbox="ghc -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d"
@@ -285,8 +262,7 @@ alias ghci-sandbox="ghci -no-user-package-db -package-db .cabal-sandbox/*-packag
 alias runhaskell-sandbox="runhaskell -no-user-package-db -package-db .cabal-sandbox/*-packages.conf.d"
 ```
 
-There is also a zsh script to show the sandbox status of the current working
-directory in our shell.
+这个zsh脚本可以显示当前目录里的沙盒状态。
 
 ```bash
 function cabal_sandbox_info() {
@@ -299,45 +275,37 @@ function cabal_sandbox_info() {
         fi
     fi
 }
- 
+
 RPROMPT="\$(cabal_sandbox_info) $RPROMPT"
 ```
 
-The cabal configuration is stored in ``$HOME/.cabal/config`` and contains
-various options including credential information for Hackage upload. One
-addition to configuration is to completely disallow the installation of packages
-outside of sandboxes to prevent accidental collisions.
+cabal的配置信息存在文件 ``$HOME/.cabal/config`` ，可以用于设置许多配置信息，比如Hackage的帐号，再比如可以禁止在任何没有沙盒的环境下安装包，这样可以有效的防止包之间的相互冲突。
 
 ```perl
 -- Don't allow global install of packages.
 require-sandbox: True
 ```
 
-A library can also be compiled with runtime profiling information enabled. More
-on this is discussed in the section on Concurrency and profiling.
+我们可以在安装编译第三方包的打开运行时性能分析选项。更多的细节我们会在稍后的“并发和性能分析”章节中提到。
 
 ```perl
 library-profiling: True
 ```
 
-Another common flag to enable is the ``documentation`` which forces the local
-build of Haddock documentation, which can be useful for offline reference. On a
-Linux filesystem these are built to the ``/usr/share/doc/ghc/html/libraries/``
-directory.
+另外一个常见的选项是 ``documentation`` ，用来生成本地的Haddock文档，在离线编程的时候特别好使（译者注：其实不离线也好使，访问本地API文档总是比直接访问Hackage上的省时又省心。）。在Linux系统中，我们可以在 ``/usr/share/doc/ghc/html/libraries/`` 目录里找到这些文档。
 
 ```perl
 documentation: True
 ```
 
-If GHC is currently installed the documentation for the Prelude and Base
-libraries should be available at this local link:
+如果安装了GHC，则通过这个链接可以查看本地Prelude和Base库的文档。（译者注：Prelude和Base可以简单理解为基础库）:
 
 [/usr/share/doc/ghc/html/libraries/index.html](file:///usr/share/doc/ghc/html/libraries/index.html)
 
 
-See:
+更多详情:
 
-* [An Introduction to Cabal Sandboxes](http://coldwa.st/e/blog/2013-08-20-Cabal-sandbox.html)
+* [Cabal 沙盒入门](http://coldwa.st/e/blog/2013-08-20-Cabal-sandbox.html)
 * [Storage and Identification of Cabalized Packages](http://www.vex.net/~trebla/haskell/sicp.xhtml)
 
 Hackage
@@ -379,8 +347,7 @@ As a rule of thumb if the Haddock docs for the library does not have a **minimal
 worked example**, it is usually safe to assume that it is a RFC-style library
 and probably should be avoided.
 
-There are several authors who it is usually safe to assume have uploaded a stable
-and usable library. These include, but are not limited to:
+下面例举的这几位作者发布的包通常都可认为是比较稳定也很实用的。当然还有一些好的作者，不甚枚举。
 
 * Bryan O'Sullivan
 * Johan Tibell
@@ -396,7 +363,7 @@ most of our time.
 
 Command    Shortcut   Action
 ---------  ---------  --------------------------
-`:reload`  `:r`       Code reload 
+`:reload`  `:r`       Code reload
 `:type`    `:t`       Type inspection
 `:kind`    `:k`       Kind inspection
 `:info`    `:i`       Information
@@ -479,7 +446,7 @@ for the vast set of compiler flag options. For example several common ones are:
 :set -fno-warn-unused-do-bind
 ```
 
-Several commands for interactive options have shortcuts: 
+Several commands for interactive options have shortcuts:
 
         Function
 ------  ---------
@@ -504,7 +471,7 @@ it :: Prelude.Integer
 ```
 
 ```haskell
-λ: :{ 
+λ: :{
 λ:| let foo = do
 λ:|           putStrLn "hello ghci"
 λ:| :}
@@ -611,7 +578,7 @@ common introduction of bottoms.
 
 ```haskell
 data F = A | B
-case x of 
+case x of
   A -> ()
 ```
 
@@ -676,7 +643,7 @@ Exhaustiveness
 
 Pattern matching in Haskell allows for the possibility of non-exhaustive
 patterns, or cases which are not exhaustive and instead of yielding a value
-diverge.  
+diverge.
 
 Partial functions from non-exhaustivity are controversial subject, and large use
 of non-exhaustive patterns is considered a dangerous code smell. Although the
@@ -963,7 +930,7 @@ f = ...
 ```haskell
 -- | Multiline documentation for the function
 -- f with multiple arguments.
-fmap :: Functor f => 
+fmap :: Functor f =>
      => (a -> b)  -- ^ function
      -> f a       -- ^ input
      -> f b       -- ^ output
@@ -993,7 +960,7 @@ Modules themselves can be referenced by enclosing them in double quotes.
 
 ```haskell
 -- | An example of a code block.
--- 
+--
 -- @
 --    f x = f (f x)
 -- @
@@ -1151,7 +1118,7 @@ Do Notation
 
 Monads syntax in Haskell is written in sugared form that is entirely equivalent
 to just applications of the monad operations. The desugaring is defined
-recursively by the rules: 
+recursively by the rules:
 
 ```haskell
 do { a <- f ; m } ≡ f >>= \a -> do { m }
@@ -1348,7 +1315,7 @@ Let's write down a new function called ``sequence`` which folds a function
 (``p``,``q``) using bind.
 
 ```haskell
-sequence :: Monad m => [m a] -> m [a] 
+sequence :: Monad m => [m a] -> m [a]
 sequence = foldr mcons (return [])
 
 mcons :: Monad m => m t -> m [t] -> m [t]
@@ -1364,7 +1331,7 @@ What does this function mean in terms of each of the monads discussed above?
 
 Sequencing a list of a ``Maybe`` values allows us to collect the results of a
 series of computations which can possibly fail and yield the aggregated values
-only if they all succeeded. 
+only if they all succeeded.
 
 ```haskell
 sequence :: [Maybe a] -> Maybe [a]
@@ -1511,7 +1478,7 @@ main = do
 Being able to manually desugar is crucial to understanding.
 
 ```haskell
-main = 
+main =
   getLine >>= \x ->
     putStrLn x >>= \_ ->
       return ()
@@ -1532,7 +1499,7 @@ So with a function desugared, it can be confusing that ``(>>=)`` operator is in
 fact building up a much larger function by composing functions together.
 
 ```haskell
-main = 
+main =
   getLine >>= \x ->
     putStrLn >>= \_ ->
       return ()
@@ -1541,7 +1508,7 @@ main =
 Written in prefix form, it becomes a little bit more digestible.
 
 ```haskell
-main = 
+main =
   (>>=) getLine (\x ->
     (>>=) putStrLn (\_ ->
           return ()
@@ -1671,7 +1638,7 @@ Or equivalently:
 **Law #2**
 
 ```haskell
-  do x <- lift m 
+  do x <- lift m
      lift (f x)
 
 = lift $ do x <- m
@@ -1788,7 +1755,7 @@ State monads.
 Pattern matching on a newtype constructor compiles into nothing. For example
 the``extractB`` function does not scrutinize the ``MkB`` constructor like the
 ``extractA`` does, because ``MkB`` does not exist at runtime, it is purely a
-compile-time construct. 
+compile-time construct.
 
 ```haskell
 data A = MkA Int
@@ -1867,7 +1834,7 @@ The Benign
 ----------
 
 It's not obvious which extensions are the most common but it's fairly safe to
-say that these extensions are benign and are safely used extensively:  
+say that these extensions are benign and are safely used extensively:
 
 * NoMonomorphismRestriction
 * FlexibleContexts
@@ -1977,7 +1944,7 @@ As of GHC 7.8 the monomorphism restriction is switched off by default in GHCi.
 λ: set +t
 
 λ: 3
-3 
+3
 it :: Num a => a
 
 λ: default (Double)
@@ -2064,9 +2031,9 @@ second = (True,)
 {-# LANGUAGE MultiWayIf #-}
 
 operation x =
-  if | x > 100   = 3  
-     | x > 10    = 2  
-     | x > 1     = 1  
+  if | x > 100   = 3
+     | x > 10    = 2
+     | x > 1     = 1
      | otherwise = 0
 ```
 
@@ -2097,7 +2064,7 @@ Pattern Synonyms
 Suppose we were writing a typechecker, it would be very common to include a
 distinct ``TArr`` term to ease the telescoping of function signatures, this is what
 GHC does in its Core language. Even though technically it could be written in
-terms of more basic application of the ``(->)`` constructor. 
+terms of more basic application of the ``(->)`` constructor.
 
 ```haskell
 data Type
@@ -2154,7 +2121,7 @@ The paradox of Haskell is that it explores so many definably unique ideas (
 laziness, purity, typeclasses ) that it becomes difficult to separate out the
 discussion of any one from the gestalt of the whole implementation.
 
-See: 
+See:
 
 * [Oh My Laziness!](http://alpmestan.com/posts/2013-10-02-oh-my-laziness.html)
 * [Reasoning about Laziness](http://www.slideshare.net/tibbe/reasoning-about-laziness)
@@ -2233,7 +2200,7 @@ Prelude.undefined
 ```
 
 For example in a lazy language the following program terminates even though it
-contains diverging terms. 
+contains diverging terms.
 
 ~~~~ {.haskell include="src/05-laziness/nodiverge.hs"}
 ~~~~
@@ -2458,13 +2425,13 @@ are left in for historical reasons. So often times it is desirable to explicitly
 implicit import and force the use of Foldable and Traversable instead:
 
 ```haskell
-import  Data.List hiding ( 
-    all , and , any , concat , concatMap find , foldl , 
-    foldl' , foldl1 , foldr , foldr1 , mapAccumL , 
-    mapAccumR , maximum , maximumBy , minimum , 
+import  Data.List hiding (
+    all , and , any , concat , concatMap find , foldl ,
+    foldl' , foldl1 , foldr , foldr1 , mapAccumL ,
+    mapAccumR , maximum , maximumBy , minimum ,
     minimumBy , notElem , or , product , sum )
 
-import Control.Monad hiding ( 
+import Control.Monad hiding (
     forM , forM_ , mapM , mapM_ , msum , sequence , sequence_ )
 ```
 
@@ -2627,8 +2594,8 @@ Prelude.foldl :: (a -> b -> a) -> a -> [b] -> a
 Prelude.foldr :: (a -> b -> b) -> b -> [a] -> b
 
 -- pseudocode
-foldr f z [a...] = f a (f b ( ... (f y z) ... )) 
-foldl f z [a...] = f ... (f (f z a) b) ... y 
+foldr f z [a...] = f a (f b ( ... (f y z) ... ))
+foldl f z [a...] = f ... (f (f z a) b) ... y
 ```
 
 For a concrete consider the simple arithmetic sequence over the binary operator
@@ -2794,7 +2761,7 @@ Text / ByteString
 =================
 
 The default Haskell string type is the rather naive linked list of characters, that while perfectly fine for
-small identifiers is not well-suited for bulk processing. 
+small identifiers is not well-suited for bulk processing.
 
 ```haskell
 type String = [Char]
@@ -2867,7 +2834,7 @@ unpack :: ByteString -> String
 ~~~~ {.haskell include="src/07-text-bytestring/bytestring.hs"}
 ~~~~
 
-See: 
+See:
 
 * [Bytestring: Bits and Pieces](https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-week/bytestring-bits-and-pieces)
 * [ByteString](http://hackage.haskell.org/package/bytestring-0.10.4.0/docs/Data-ByteString.html)
@@ -3004,11 +2971,11 @@ have:
 ```haskell
 class Functor f where
   fmap :: (a -> b) -> f a -> f b
- 
+
 class Functor f => Applicative f where
   pure :: a -> f a
   (<*>) :: f (a -> b) -> f a -> f b
- 
+
 class Applicative m => Monad m where
   (>>=) :: m a -> (a -> m b) -> m b
   ma >>= f = join (fmap f ma)
@@ -3140,7 +3107,7 @@ histogram = map (head &&& length) . group . sort
 
 **Arrow notation**
 
-The following are equivalent: 
+The following are equivalent:
 
 ```haskell
 {-# LANGUAGE Arrows #-}
@@ -3170,7 +3137,7 @@ Bifunctors
 ----------
 
 Bifunctors are a generalization of functors to include types parameterized by
-two parameters and include two map functions for each parameter. 
+two parameters and include two map functions for each parameter.
 
 ```haskell
 class Bifunctor p where
@@ -3500,7 +3467,7 @@ Choice and failure.
 
 ```haskell
 class Monad m => MonadPlus m where
-   mzero :: m a 
+   mzero :: m a
    mplus :: m a -> m a -> m a
 
 instance MonadPlus [] where
@@ -3628,7 +3595,7 @@ following:
 ~~~~ {.haskell include="src/10-advanced-monads/free_impl.hs"}
 ~~~~
 
-See: 
+See:
 
 * [Monads for Free!](http://www.andres-loeh.de/Free.pdf)
 * [I/O is not a Monad](http://r6.ca/blog/20110520T220201Z.html)
@@ -3686,7 +3653,7 @@ A universally quantified type-variable actually implies quite a few rather deep
 properties about the implementation of a function that can be deduced from its
 type signature. For instance the identity function in Haskell is guaranteed to
 only have one implementation since the only information that the information
-that can present in the body 
+that can present in the body
 
 ```haskell
 id :: forall a. a -> a
@@ -3740,12 +3707,12 @@ within System-F. System-F is sometimes referred to in texts as the
 ```haskell
 t : t -> t     -- function types
   | a          -- type variables
-  | ∀ a . t    -- forall 
+  | ∀ a . t    -- forall
 
 e : x          -- variables
   | λ(x:t).e   -- value abstraction
   | e1 e2      -- value application
-  | Λa.e       -- type abstraction 
+  | Λa.e       -- type abstraction
   | e_t        -- type application
 ```
 
@@ -3817,7 +3784,7 @@ type, but since ``a`` is bound under the quantifier it must not be unified with
 
 ```perl
 Couldn't match expected type `a' with actual type `t'
-`a' is a rigid type variable bound by a type expected by the context: a -> a 
+`a' is a rigid type variable bound by a type expected by the context: a -> a
 `t' is a rigid type variable bound by the inferred type of g :: t -> Int
 In the expression: x In the first argument of `escape', namely `(\ a -> x)'
 In the expression: escape (\ a -> x)
@@ -3912,7 +3879,7 @@ bar st = runST `apply` st
     In an equation for `bar': bar st = runST `apply` st
 ```
 
-See: 
+See:
 
 * [SPJ Notes on $](https://www.haskell.org/pipermail/glasgow-haskell-users/2010-November/019431.html)
 
@@ -4061,7 +4028,7 @@ single kind ``*`` and an arrow kind ``->``.
 
 ```haskell
 κ : *
-  | κ -> κ 
+  | κ -> κ
 ```
 
 ```haskell
@@ -4139,10 +4106,10 @@ Type Equality
 With a richer language for datatypes we can express terms that witness the
 relationship between terms in the constructors, for example we can now express a
 term which expresses propositional equality between two types.
- 
+
 The type ``Eql a b`` is a proof that types ``a`` and ``b`` are equal, by pattern
 matching on the single ``Refl`` constructor we introduce the equality constraint
-into the body of the pattern match. 
+into the body of the pattern match.
 
 ~~~~ {.haskell include="src/12-gadts/equal.hs"}
 ~~~~
@@ -4169,7 +4136,7 @@ and variables might be written like the following:
 ```haskell
 type Name = String
 
-data Exp 
+data Exp
   = Var Name
   | Lam Name Exp
   | App Exp Exp
@@ -4204,7 +4171,7 @@ this form evaluation requires unpacking into a seperate Value type to wrap the l
 ~~~~ {.haskell include="src/13-lambda-calculus/phoas.hs"}
 ~~~~
 
-See: 
+See:
 
 * [PHOAS](http://adam.chlipala.net/papers/PhoasICFP08/PhoasICFP08Talk.pdf)
 * [Encoding Higher-Order Abstract Syntax with Parametric Polymorphism](http://www.seas.upenn.edu/~sweirich/papers/itabox/icfp-published-version.pdf)
@@ -4272,12 +4239,12 @@ Nat a = μ a. 1 + a
 
 -- μX. 1 + A * X
 data List a = Nil | Cons a (List a)
-List a = μ a. 1 + a * (List a) 
+List a = μ a. 1 + a * (List a)
        = 1 + a + a^2 + a^3 + a^4 ...
 
 -- μX. A + A*X*X
 data Tree a f = Leaf a | Tree a f f
-Tree a = μ a. 1 + a * (List a) 
+Tree a = μ a. 1 + a * (List a)
        = 1 + a^2 + a^4 + a^6 + a^8 ...
 ```
 
@@ -4366,7 +4333,7 @@ compose f g = f . unFix . g
 recursion-schemes
 -----------------
 
-The code from the F-algebra examples above is implemented in an off-the-shelf 
+The code from the F-algebra examples above is implemented in an off-the-shelf
 library called ``recursion-schemes``.
 
 ~~~~ {.haskell include="src/14-interpreters/recursion_schemes.hs"}
@@ -4377,7 +4344,7 @@ An example of usage:
 ~~~~ {.haskell include="src/14-interpreters/catamorphism.hs"}
 ~~~~
 
-See: 
+See:
 
 * [recursion-schemes](http://hackage.haskell.org/package/recursion-schemes)
 
@@ -4429,7 +4396,7 @@ QuickCheck
 
 Probably the most famous Haskell library, QuickCheck is a testing framework for generating large random tests
 for arbitrary functions automatically based on the types of their arguments.
-  
+
 ```haskell
 quickCheck :: Testable prop => prop -> IO ()
 (==>) :: Testable prop => Bool -> prop -> Property
@@ -4442,7 +4409,7 @@ choose :: Random a => (a, a) -> Gen a
 
 ```bash
 $ runhaskell qcheck.hs
-*** Failed! Falsifiable (after 3 tests and 4 shrinks):    
+*** Failed! Falsifiable (after 3 tests and 4 shrinks):
 [0]
 [1]
 
@@ -4528,7 +4495,7 @@ but practically it still quite useful.
 Running this we rather see it is able to deduce most of the laws for list functions.
 
 ```bash
-$ runhaskell src/quickspec.hs                                                                     
+$ runhaskell src/quickspec.hs
 == API ==
 -- functions --
 map :: (A -> A) -> [A] -> [A]
@@ -5219,7 +5186,7 @@ Vectors
 
 Using this new structure we can create a ``Vec`` type which is parameterized by its length as well as its
 element type now that we have a kind language rich enough to encode the successor type in the kind signature
-of the generalized algebraic datatype. 
+of the generalized algebraic datatype.
 
 ~~~~ {.haskell include="src/17-promotion/datakinds.hs"}
 ~~~~
@@ -5783,7 +5750,7 @@ instance Data Animal where
   gunfold k z c
     = case constrIndex c of
         1 -> z Cat
-        2 -> z Dog 
+        2 -> z Dog
 
   toConstr Cat = cCat
   toConstr Dog = cDog
@@ -5811,7 +5778,7 @@ instance Data a => Data [a] where
   toConstr []    = nilConstr
   toConstr (_:_) = consConstr
 
-  gunfold k z c 
+  gunfold k z c
     = case constrIndex c of
         1 -> z []
         2 -> k (k (z (:)))
@@ -5840,7 +5807,7 @@ instance (Data a, Data b) => Data (a,b) where
 
   toConstr (_,_) = tuple2Constr
 
-  gunfold k z c  
+  gunfold k z c
     = case constrIndex c of
       1 -> k (k (z (,)))
 
@@ -5946,7 +5913,7 @@ like this:
 ~~~~ {.haskell include="src/18-generics/generics.hs"}
 ~~~~
 
-Use ``kind!`` in GHCi we can look at the type family ``Rep`` associated with a Generic instance. 
+Use ``kind!`` in GHCi we can look at the type family ``Rep`` associated with a Generic instance.
 
 ```haskell
 λ: :kind! Rep Animal
@@ -6006,7 +5973,7 @@ their own.
 ```haskell
 {-# LANGUAGE DefaultSignatures #-}
 
-class GEq a where 
+class GEq a where
   geq :: a -> a -> Bool
 
   default geq :: (Generic a, GEq' (Rep a)) => a -> a -> Bool
@@ -6016,7 +5983,7 @@ class GEq a where
 Now anyone using our library need only derive Generic and create an empty
 instance of our typeclass instance without writing any boilerplate for ``GEq``.
 
-See: 
+See:
 
 * [Andres Loh: Datatype-generic Programming in Haskell](http://www.andres-loeh.de/DGP-Intro.pdf)
 * [generic-deriving](http://hackage.haskell.org/package/generic-deriving-1.6.3)
@@ -6166,8 +6133,8 @@ is accomplished with several generic functions.
 Double   id           fromRational  truncate      truncate       truncate      toRational
 Float    fromRational id            truncate      truncate       truncate      toRational
 Int      fromIntegral fromIntegral  id            fromIntegral   fromIntegral  fromIntegral
-Word     fromIntegral fromIntegral  fromIntegral  id             fromIntegral  fromIntegral                           
-Integer  fromIntegral fromIntegral  fromIntegral  fromIntegral   id            fromIntegral                           
+Word     fromIntegral fromIntegral  fromIntegral  id             fromIntegral  fromIntegral
+Integer  fromIntegral fromIntegral  fromIntegral  fromIntegral   id            fromIntegral
 Rational fromRatoinal fromRational  truncate      truncate       truncate      id
 
 Integer
@@ -6187,7 +6154,7 @@ Complex
 -------
 
 Haskell supports arithmetic with complex numbers via a Complex datatype. The
-first argument is the real part, while the second is the imaginary. 
+first argument is the real part, while the second is the imaginary.
 
 ```haskell
 -- 1 + 2i
@@ -6195,7 +6162,7 @@ let complex = 1 :+ 2
 ```
 
 ```haskell
-data Complex a = a :+ a 
+data Complex a = a :+ a
 mkPolar :: RealFloat a => a -> a -> Complex a
 ```
 
@@ -6645,7 +6612,7 @@ Function Pointers
 
 Using the above FFI functionality, it's trivial to pass C function pointers into
 Haskell, but what about the inverse passing a function pointer to a Haskell
-function into C using ``foreign import ccall "wrapper"``. 
+function into C using ``foreign import ccall "wrapper"``.
 
 ~~~~ {.cpp include="src/21-ffi/pointer.c"}
 ~~~~
@@ -6772,7 +6739,7 @@ Passing the flag ``-l``  generates the eventlog which can be rendered with the
 threadscope library.
 
 ```haskell
-$ ghc -O2 -threaded -rtsopts -eventlog Example.hs 
+$ ghc -O2 -threaded -rtsopts -eventlog Example.hs
 $ ./program +RTS -N4 -l
 $ threadscope Example.eventlog
 ```
@@ -6824,7 +6791,7 @@ parallelized beyond simply weak head normal form. For instance if the arguments 
 constructor we'd like to parallelize the entire section of work in evaluated the expression to normal form
 instead of just the outer layer. As such we'd like to generalize our strategies so the the evaluation strategy
 for the arguments can be passed as an argument to the strategy.
-  
+
 ``Control.Parallel.Strategies`` contains a generalized version of ``rpar`` which embeds additional evaluation
 logic inside the ``rpar`` computation in Eval monad.
 
@@ -6954,13 +6921,13 @@ Parsec
 ------
 
 For parsing in Haskell it is quite common to use a family of libraries known as *Parser Combinators* which let
-us write code to generate parsers which themselves looks very similar to the parser grammar itself! 
+us write code to generate parsers which themselves looks very similar to the parser grammar itself!
 
-              Combinators   
+              Combinators
 -----------   ------------
 ``<|>``       The choice operator tries to parse the first argument before proceeding to the second. Can be chained sequentially to a generate a sequence of options.
 ``many``      Consumes an arbitrary number of patterns matching the given pattern and returns them as a list.
-``many1``     Like many but requires at least one match. 
+``many1``     Like many but requires at least one match.
 ``optional``  Optionally parses a given pattern returning its value as a Maybe.
 ``try``       Backtracking operator will let us parse ambiguous matching expressions and restart with a different pattern.
 
@@ -7406,7 +7373,7 @@ And again we get a nice typed ADT as a result.
 HTTP
 ----
 
-Haskell has a variety of HTTP request and processing libraries. 
+Haskell has a variety of HTTP request and processing libraries.
 
 ~~~~ {.haskell include="src/27-web/http.hs"}
 ~~~~
@@ -7477,7 +7444,7 @@ names that includes modules and package names into a higher level Name type.
 * **Typechecker** is a large pass that serves two purposes, first is the core type
   bidirectional inference engine where most of the work happens and the
   translation between the frontend ``Core`` syntax.
-* **Desugarer** translates several higher level syntactic constructors 
+* **Desugarer** translates several higher level syntactic constructors
     - ``where`` statements are turned into (possibly recursive) nested ``let``
       statements.
     - Nested pattern matches are expanded out into splitting trees of case
@@ -7522,7 +7489,7 @@ Flag                   Action
 ``-ddump-spec``        Output of specialisation pass.
 ``-ddump-rules``       Output of applying rewrite rules.
 ``-ddump-vect``        Output results of vectorize pass.
-``-ddump-simpl``       Ouptut of the SimplCore pass. 
+``-ddump-simpl``       Ouptut of the SimplCore pass.
 ``-ddump-inlinings``   Output of the inliner.
 ``-ddump-cse``         Output of the common subexpression elimination pass.
 ``-ddump-prep``        The CorePrep pass.
@@ -7544,7 +7511,7 @@ metadata and longform names to make the representation easier to read.
 
 ```bash
 alias ghci-core="ghci -ddump-simpl -dsuppress-idinfo \
--dsuppress-coercions -dsuppress-type-applications \ 
+-dsuppress-coercions -dsuppress-type-applications \
 -dsuppress-uniques -dsuppress-module-prefixes"
 ```
 
@@ -7665,8 +7632,8 @@ x `seq` y
 ```
 
 ```haskell
-case x of _ { 
-  __DEFAULT -> y 
+case x of _ {
+  __DEFAULT -> y
 }
 ```
 
@@ -7712,7 +7679,7 @@ f =
     }
 ```
 
-Of course, adding a concrete type signature changes the desugar just matching on the unboxed values. 
+Of course, adding a concrete type signature changes the desugar just matching on the unboxed values.
 
 ```haskell
 f :: Int -> Int
@@ -7813,7 +7780,7 @@ is using something like ``unsafePerformIO`` or some other unholy function. In
 these cases naive inlining might duplicate effects at multiple call-sites
 throughout the program which would be undesirable.
 
-See: 
+See:
 
 * [Secrets of the Glasgow Haskell Compiler inliner](https://research.microsoft.com/en-us/um/people/simonpj/Papers/inlining/inline.pdf)
 
@@ -7853,15 +7820,15 @@ numDFloat = DNum plusFloat timesFloat negateFloat
 
 ```haskell
 + :: forall a. Num a => a -> a -> a
-+ = \ (@ a) (tpl :: Num a) -> 
++ = \ (@ a) (tpl :: Num a) ->
   case tpl of _ { D:Num tpl _ _ -> tpl }
 
 * :: forall a. Num a => a -> a -> a
-* = \ (@ a) (tpl :: Num a) -> 
+* = \ (@ a) (tpl :: Num a) ->
   case tpl of _ { D:Num _ tpl _ -> tpl }
 
 negate :: forall a. Num a => a -> a
-negate = \ (@ a) (tpl :: Num a) -> 
+negate = \ (@ a) (tpl :: Num a) ->
   case tpl of _ { D:Num _ _ tpl -> tpl }
 ```
 
@@ -7968,7 +7935,7 @@ nonspec =
 For a tight loop over numeric types specializing at the call site can result in
 orders of magnitude performance increase. Although the cost in compile-time can
 often be non-trivial and when used function used at many call-sites this can
-slow GHC's simplifier pass to a crawl. 
+slow GHC's simplifier pass to a crawl.
 
 The best advice is profile and look for large uses of dictionary projection in
 tight loops and then specialize and inline in these places.
@@ -7985,11 +7952,11 @@ binary that includes the runtime statically linked into it.
 
 ```bash
 $ ghc -O2 --make -static -optc-static -optl-static -optl-pthread Example.hs
-$ file Example                                                                                       
+$ file Example
 Example: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.32, not stripped
-$ ldd Example                                                                                        
+$ ldd Example
         not a dynamic executable
- 
+
 ```
 
 In addition the file size of the resulting binary can be reduced by stripping
@@ -8171,7 +8138,7 @@ our "Hello World" translates into the following Core:
 print (unpackCString# "Hello World"#)
 ```
 
-See: 
+See:
 
 * [Unboxed Values as First-Class Citizens](http://www.haskell.org/ghc/docs/papers/unboxed-values.ps.gz)
 
@@ -8546,7 +8513,7 @@ memory.
 
 To understand Cmm it is useful to look at the code generated by the equivalent
 Haskell and slowly understand the equivalence and mechanical translation maps
-one to the other. 
+one to the other.
 
 There are generally two parts to every Cmm definition, the **info table** and
 the **entry code**. The info table maps directly ``StgInfoTable`` struct and
@@ -8861,7 +8828,7 @@ entry-code for the objects in memory such that the fields from the info table
 can be accessed by pointer arithmetic on the function pointer to the code
 itself. Not performing this optimization would involve chasing through one more
 pointer to get to the info table. Given how often info-tables are accessed using
-the tables-next-to-code optimization results in a tractable speedup. 
+the tables-next-to-code optimization results in a tractable speedup.
 
 **Pointer Tagging**
 
@@ -8920,7 +8887,7 @@ from the main process.
 RTS Profiling
 -------------
 
-The GHC runtime system can be asked to dump information about 
+The GHC runtime system can be asked to dump information about
 
 ```haskell
 $ ./program +RTS -s
@@ -9015,13 +8982,13 @@ See:
 
 * [unbound-generics](https://github.com/lambdageek/unbound-generics)
 
-LLVM 
+LLVM
 ----
 
 LLVM is a library for generating machine code. The llvm-general bindings provide a way to model, compile and
 execute LLVM bytecode from within the Haskell runtime.
 
-See: 
+See:
 
 * [Implementing a JIT Compiled Language with Haskell and LLVM](http://www.stephendiehl.com/llvm/)
 
@@ -9030,7 +8997,7 @@ Printer Combinators
 
 Pretty printer combinators compose logic to print strings.
 
-              Combinators   
+              Combinators
 -----------   ------------
 ``<>``        Concatenation
 ``<+>``       Spaced concatenation
@@ -9048,7 +9015,7 @@ The pretty printed form of the ``k`` combinator:
 
 The ``Text.Show.Pretty`` library can be used to pretty print nested data structures in a more human readable
 form for any type that implements ``Show``.  For example a dump of the structure for the AST of SK combinator
-with ``ppShow``. 
+with ``ppShow``.
 
 ```haskell
 App
@@ -9091,7 +9058,7 @@ host language. Notably values from the host languages can be injected into the c
 user-definable logic allowing information to flow between the two languages.
 
 In practice quasiquotation can be used to implement custom domain specific languages or integrate with other
-general languages entirely via code-generation. 
+general languages entirely via code-generation.
 
 We've already seen how to write a Parsec parser, now let's write a quasiquoter for it.
 
@@ -9203,7 +9170,7 @@ Type         Quasiquoted     Class
 ``Q [Dec]``  ``[d| ... |]``  declaration
 
 ```haskell
-data QuasiQuoter = QuasiQuoter 
+data QuasiQuoter = QuasiQuoter
   { quoteExp  :: String -> Q Exp
   , quotePat  :: String -> Q Pat
   , quoteType :: String -> Q Type
@@ -9365,7 +9332,7 @@ template_haskell_show.hs:1:1: Splicing declarations
 
 At the point of the splice all variables and types used must be in scope, so it must appear after their
 declarations in the module. As a result we often have to mentally topologically sort our code when using
-TemplateHaskell such that declarations are defined in order. 
+TemplateHaskell such that declarations are defined in order.
 
 See: [Template Haskell AST](http://hackage.haskell.org/package/template-haskell-2.9.0.0/docs/Language-Haskell-TH.html#t:Exp)
 
@@ -9480,8 +9447,8 @@ There are several implementations of note that are mostly compatible but differ
 in scope:
 
 * *lens-family-core*
-* *fc-labels* 
-* *data-lens-light* 
+* *fc-labels*
+* *data-lens-light*
 * *lens*
 
 **<span style="color:red">WARNING</span>: The ``lens`` library is considered by
@@ -9695,7 +9662,7 @@ scheme](https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-wee
 
 The sheer number of operators provided by lens is a polarizing for some, but all
 of the operators can be written in terms of the textual functions (``set``,
-``view``, ``over``, ``at``, ...) and some people prefer to use these instead. 
+``view``, ``over``, ``at``, ...) and some people prefer to use these instead.
 
 If one buys into lens model, it can serve as a partial foundation to write logic
 over a wide variety of data structures and computations and subsume many of the
@@ -9704,7 +9671,7 @@ existing patterns found in the Prelude.
 ~~~~ {.haskell include="src/32-lenses/complexlens.hs"}
 ~~~~
 
-See: 
+See:
 
 * [A Little Lens Tutorial](https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-week/a-little-lens-starter-tutorial)
 * [CPS based functional references](http://twanvl.nl/blog/haskell/cps-functional-references)
@@ -9795,7 +9762,7 @@ This results in a final state like the following.
 Box
   { _particles =
       [ Particle
-          { _pos = 
+          { _pos =
               Vector { _x = 3.268546939011934 , _y = 4.356638656040016 }
           , _vel =
               Vector { _x = 0.6537093878023869 , _y = 0.8713277312080032 }
@@ -10022,7 +9989,7 @@ type Nat f g = forall a. f a -> g a
 Such that for a natural transformation ``h`` we have:
 
 ```haskell
-fmap f . h ≡ h . fmap f 
+fmap f . h ≡ h . fmap f
 ```
 
 The simplest example is between (f = List) and (g = Maybe) types.
@@ -10135,7 +10102,7 @@ Kleisli composition (i.e. Kleisli Fish) is defined to be:
 
 ```haskell
 (>=>) :: Monad m => (a -> m b) -> (b -> m c) -> a -> m c
-f >=> g ≡ \x -> f x >>= g 
+f >=> g ≡ \x -> f x >>= g
 
 (<=<) :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
 (<=<) = flip (>=>)
@@ -10170,5 +10137,3 @@ Resources
 * [Category Theory, Awodey](http://www.amazon.com/Category-Theory-Oxford-Logic-Guides/dp/0199237182)
 * [Category Theory Foundations](https://www.youtube.com/watch?v=ZKmodCApZwk)
 * [The Catsters](http://www.youtube.com/user/TheCatsters)
-
-
