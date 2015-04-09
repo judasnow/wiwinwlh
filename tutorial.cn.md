@@ -292,7 +292,7 @@ require-sandbox: True
 library-profiling: True
 ```
 
-另外一个常见的选项是 ``documentation`` ，用来生成本地的Haddock文档，在离线编程的时候特别好使（译者注：其实不离线也好使，访问本地API文档总是比直接访问Hackage上的省时又省心。）。在Linux系统中，我们可以在 ``/usr/share/doc/ghc/html/libraries/`` 目录里找到这些文档。
+另外一个常见的选项是 ``documentation`` ，用来生成本地的Haddock文档，在离线编程的时候特别好使（译者注：其实不离线也好使，访问本地API文档总是比直接访问Hackage上的省时又省心。）。在Linux系统中，我们可以在 ``/usr/share/doc/ghc-doc/html/libraries/index.html`` 找到这些文档。
 
 ```perl
 documentation: True
@@ -300,7 +300,7 @@ documentation: True
 
 如果安装了GHC，则通过这个链接可以查看本地Prelude和Base库的文档。（译者注：Prelude和Base可以简单理解为基础库）:
 
-[/usr/share/doc/ghc/html/libraries/index.html](file:///usr/share/doc/ghc/html/libraries/index.html)
+[/usr/share/doc/ghc-doc/html/libraries/index.html](file:///usr/share/doc/ghc-doc/html/libraries/index.html)
 
 
 更多详情:
