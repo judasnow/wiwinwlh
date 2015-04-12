@@ -199,7 +199,7 @@ $ cabal repl <name>
 
 这里 ``<name>`` 用来指定可执行文件名或者库文件名。可以在名字前加前缀，更加明确的指明是可执行文件名 ``exe:<name>`` 还是库文件 ``lib:<name>`` 。
 
-要编译本地包到目录 ``,/dist/build`` ， 可以执行命令 ``build``
+要编译本地包到目录 ``./dist/build`` ， 可以执行命令 ``build``
 
 ```bash
 $ cabal build
@@ -311,41 +311,22 @@ documentation: True
 Hackage
 -------
 
-Hackage is the canonical source of open source Haskell packages. Being a
-transitional language, Hackage is many things to many people but there seem to
-be two dominant philosophies:
+Hackage是发布Haskell开源包的权威站点。作为一门权威的语言，Hackage的作用可谓是仁者见仁、智者见智，然而它提供了两个主要理念:
 
-**Reusable Code / Building Blocks**
+**代码重用／组建编译（building blocks）**
 
 Libraries exist as stable, community supported, building blocks for building
-higher level functionality on top of an edifice which is common and stable. The
-author(s) of the library have written the library as a means of packaging up
-their understanding of a problem domain so that others can build on their
-understanding and expertise.
+higher level functionality on top of an edifice which is common and stable. 库的作者们借此来表达他们是理解某一个问题领域，于是这些专业知识可以被他人所用。
 
-**A Staging Area / Request for Comments**
+**展示区域／征求意见**
 
-A common philosophy is that Hackage is a place to upload experimental libraries
-up as a means of getting community feedback and making the code publicly
-available.  The library author(s) often rationalize putting these kind of
-libraries up undocumented, often not indicating what the library even does, by
-simply stating that they intend to tear it all down and rewrite it later. This
-unfortunately means a lot of Hackage namespace has become polluted with dead-end
-bit-rotting code.
+一个常规的理念是上传实验性的库到Hackage以便可以获得社区的反馈和公开你的代码。于情于理，这些作者们通常不会给库增加文档，也不指明是干嘛的，只会简单申明说可能会推倒重来。这也很不幸的意味着Hackage上很多namespace被那些糟糕的代码污染了。
 
-Many other language ecosystems (Python, NodeJS, Ruby) favor the former
-philosophy, and coming to Haskell can be kind of unnerving to see *thousands of
-libraries without the slightest hint of documentation or description of
-purpose*. It is an open question about the cultural differences between the two
-philosophies and how sustainable the current cultural state of Hackage is.
+很多其他语言的生态系统（Python, NodeJS, Ruby）喜欢第一种理念，当它们遇上Haskell时就会捉急的看到*几千个没有一点点文档和描述的库*。关于这两种理念的异同以及现今Hackage的可持续性还是个公开的话题。
 
-Needless to say there is a lot of very low-quality Haskell code and
-documentation out there today, and being conservative in library assessment is a
-necessary skill.
+Hackage上存在着大量低质量的Haskell代码和文档是个不争的事实，保守地评估库的质量变得是一项必不可少的技能。
 
-As a rule of thumb if the Haddock docs for the library does not have a **minimal
-worked example**, it is usually safe to assume that it is a RFC-style library
-and probably should be avoided.
+简而言之，如果某个库的Haddock文档连个简单的**能运行**的例子都没有，基本上就可以认为它还处于征求意见、不太稳定状态。
 
 下面例举的这几位作者发布的包通常都可认为是比较稳定也很实用的。当然还有一些好的作者，不甚枚举。
 
@@ -358,10 +339,9 @@ and probably should be avoided.
 GHCi
 ----
 
-GHCi is the interactive shell for the GHC compiler. GHCi is where we will spend
-most of our time.
+GHCi是GHC编译器的一个交互性shell。我们会在GHCi上花掉很多时间。
 
-Command    Shortcut   Action
+命令        简写       功用
 ---------  ---------  --------------------------
 `:reload`  `:r`       Code reload
 `:type`    `:t`       Type inspection
