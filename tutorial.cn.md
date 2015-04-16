@@ -343,15 +343,14 @@ GHCi是GHC编译器的一个交互性shell。我们会在GHCi上花掉很多时�
 
 命令        简写       功用
 ---------  ---------  --------------------------
-`:reload`  `:r`       Code reload
-`:type`    `:t`       Type inspection
-`:kind`    `:k`       Kind inspection
-`:info`    `:i`       Information
-`:print`   `:p`       Print the expression
-`:edit`    `:e`       Load file in system editor.
+`:reload`  `:r`       重新载入代码
+`:type`    `:t`       查看类型
+`:kind`    `:k`       查看Kind
+`:info`    `:i`       信息
+`:print`   `:p`       输出表达式
+`:edit`    `:e`       用编辑器打开代码
 
-The introspection commands are an essential part of debugging and interacting
-with Haskell code:
+这些内带的命令在调试和交互Haskell代码时是必不可少的:
 
 ```haskell
 λ: :type 3
@@ -378,15 +377,14 @@ data [] a = ... | a : [a]       -- Defined in `GHC.Types'
 infixr 5 :
 ```
 
-The current state of the global environment in the shell can also be queried.
-Such as module-level bindings and types:
+在这个shell里可以查看当前全局变量的状态，比如模块所声明的类型:
 
 ```haskell
 λ: :browse
 λ: :show bindings
 ```
 
-Or module level imports:
+或者模块声明的依赖:
 
 ```haskell
 λ: :show imports
@@ -395,7 +393,7 @@ import Data.Eq
 import Control.Monad
 ```
 
-Or compiler-level flags and pragmas:
+或者编译器的相关的标签和语法（pragmas）:
 
 ```haskell
 λ: :set
@@ -417,16 +415,14 @@ with the following modifiers:
   -XExtendedDefaultRules
 ```
 
-Language extensions and compiler pragmas can be set at the prompt. See the [Flag
-Reference](http://www.haskell.org/ghc/docs/latest/html/users_guide/flag-reference.html)
-for the vast set of compiler flag options. For example several common ones are:
+可以在提示区语言的扩展和编译器语法（pragmas），在[标签参考]页面可以查看大量的编译器选项。比如这几个很常用的：
 
 ```haskell
 :set -XNoMonomorphismRestriction
 :set -fno-warn-unused-do-bind
 ```
 
-Several commands for interactive options have shortcuts:
+有些交互式选项命令有快捷方式
 
         Function
 ------  ---------
@@ -459,17 +455,15 @@ it :: Prelude.Integer
 "hello ghci"
 ```
 
-The configuration for the GHCi shell can be customized globally by defining a
-``ghci.conf`` in ``$HOME/.ghc/`` or in the current working directory as
-``./.ghci.conf``.
+通过文件 ``$HOME/.ghc/ghci.conf`` 或者当前目录的 ``./.ghci.conf`` ， 可以全局性的自定义GHCi的配置。（笔者注：文件 ``$HOME/.ghc/ghci.conf`` 在我ubuntu系统下并不生效，但是 ``$HOME/.ghci`` 就可以）。
 
-For example we can add a command to use the Hoogle type search from within GHCi.
+比如我们可以增加一个命令在GHCi里使用Hoogle通过类型查找信息。
 
 ```bash
 cabal install hoogle
 ```
 
-We can use it by adding a command to our ``ghci.conf``.
+可以在 ``ghci.conf`` 里增加这样一个命令。
 
 ~~~~ {.haskell include="src/01-basics/ghci.conf"}
 ~~~~
@@ -480,20 +474,17 @@ Data.Traversable fmapDefault :: Traversable t => (a -> b) -> t a -> t b
 Prelude fmap :: Functor f => (a -> b) -> f a -> f b
 ```
 
-For reasons of sexiness it is desirable to set your GHC prompt to a ``λ`` or a
-``ΠΣ`` if you're into that lifestyle.
+还可以很_风骚_的把GHCi提示符设置成 ``λ`` 或者 ``ΠΣ`` 。
 
 ```haskell
 :set prompt "λ: "
 :set prompt "ΠΣ: "
 ```
 
-Editor Integration
+编辑器集成
 ------------------
 
-Haskell has a variety of editor tools that can be used to provide interactive
-development feedback and functionality such as querying types of subexpressions,
-linting, type checking, and code completion.
+Haskell有各色编辑器工具帮助交互式开发，比如查询表达式的类型，类型检查和代码补齐。
 
 ![](img/errors.png)
 
@@ -526,7 +517,7 @@ See:
 
 * [A Vim + Haskell Workflow](http://www.stephendiehl.com/posts/vim_haskell.html)
 
-Bottoms
+永错值(Bottoms)
 -------
 
 ```haskell
