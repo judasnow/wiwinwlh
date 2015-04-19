@@ -6,6 +6,8 @@ Stephen Diehl (<a class="author" href="https://twitter.com/smdiehl">@smdiehl</a>
 
 译者: Haisheng Wu (<a class="author" href="https://github.com/freizl">@freizl</a> )
 
+[原文链接](http://dev.stephendiehl.com/hask/)
+
 所有的代码可以在[这里](https://github.com/HaskellCNOrg/wiwinwlh/tree/master/src). 如果你发现任何的错误或者是有更据说明性的例子，欢迎到[github](https://github.com/HaskellCNOrg/wiwinwlh)提交pull request.
 
 这是此文档第三次修改草案.
@@ -488,8 +490,7 @@ Haskell有各色编辑器工具帮助交互式开发，比如查询表达式的�
 
 ![](img/errors.png)
 
-Many prepackaged setups exist to expedite the process of setting up many of the
-programmer editors for Haskell development:
+对于大部分程序员用来开发Haskell的编辑器，有许多关于如何安装的参考文章来帮助加速安装:
 
 **Vim**
 
@@ -499,8 +500,7 @@ https://github.com/begriffs/haskell-vim-now
 
 https://github.com/chrisdone/emacs-haskell-config
 
-The tools that many of these packages use behind the hood are usually available
-on cabal.
+配置这些工具背后依赖的包通常都可以用cabal来安装。
 
 ```haskell
 cabal install hdevtools
@@ -510,14 +510,13 @@ cabal install ghcid
 cabal install ghci-ng
 ```
 
-In particular both ``ghc-mod`` and hdevtools can remarkably improve the
-efficiency and productivity.
+其中，特别是 ``ghc-mod`` 和 ``hdevtools`` 极大的提高了工作效率。
 
-See:
+参见:
 
 * [A Vim + Haskell Workflow](http://www.stephendiehl.com/posts/vim_haskell.html)
 
-永错值(Bottoms)
+永错值 (Bottoms)
 -------
 
 ```haskell
@@ -525,23 +524,20 @@ error :: String -> a
 undefined :: a
 ```
 
-The bottom is a singular value that inhabits every type. When evaluated the
-semantics of Haskell no longer yields a meaningful value. It's usually written as
-the symbol ⊥ (i.e. the compiler flipping you off ).
+bottom是一个单一的值，它可以是任何类型。当语义解析时，它不在是一个有意义的值。通常用符号 ``⊥`` 表示。（比如理解为编译器终止）
 
-An example of an infinite looping term:
+比如一个无限循环项
 
 ```haskell
 f :: a
 f = let x = x in x
 ```
 
-The ``undefined`` function is nevertheless extremely practical to accommodate
-writing incomplete programs and for debugging.
+然而 ``undefined`` 函数在用于未完整的程序和调试方面还是提供相当实用的帮助。
 
 ```haskell
 f :: a -> Complicated Type
-f = undefined -- write tomorrow, typecheck today!
+f = undefined -- 先让编译通过，明天再实现功能。
 ```
 
 Partial functions from non-exhaustive pattern matching is probably the most
@@ -609,7 +605,7 @@ can be short circuited to generate position information in the place of either
 
 See: [Avoiding Partial Functions](http://www.haskell.org/haskellwiki/Avoiding_partial_functions)
 
-Exhaustiveness
+穷举性 (Exhaustiveness)
 --------------
 
 Pattern matching in Haskell allows for the possibility of non-exhaustive
